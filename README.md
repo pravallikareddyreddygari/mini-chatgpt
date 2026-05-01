@@ -1,3 +1,5 @@
+<img width="1556" height="735" alt="image" src="https://github.com/user-attachments/assets/62345548-0dd8-4a03-8602-2037bd2f2c3f" />
+
 # Mini ChatGPT
 
 A simple ChatGPT-style interface built with Next.js, React, TypeScript, and Tailwind CSS.
