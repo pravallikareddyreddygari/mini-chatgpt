@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Mini ChatGPT",
   description: "A simple ChatGPT-style interface",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
