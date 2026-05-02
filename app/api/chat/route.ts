@@ -13,10 +13,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const provider = process.env.API_PROVIDER || "openrouter";
+    const provider = process.env.API_PROVIDER || "gemini";
 
     if (provider === "openrouter") {
       return await handleOpenRouter(message, req);
+    } else if (provider === "gemini") {
+      return await handleGemini(message);
     } else {
       return await handleOpenAI(message);
     }
@@ -132,5 +134,46 @@ async function handleOpenAI(message: string) {
   }
 
   const reply = data?.choices?.[0]?.message?.content || "No response generated";
+  return NextResponse.json({ reply });
+}
+
+async function handleGemini(message: string) {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "Gemini API key not configured. Get a free key from https://aistudio.google.com/app/apikey" },
+      { status: 500 }
+    );
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: message
+          }]
+        }]
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error("Gemini Error:", data);
+    return NextResponse.json(
+      { error: data?.error?.message || "Gemini API failed" },
+      { status: response.status }
+    );
+  }
+
+  const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated";
   return NextResponse.json({ reply });
 }
