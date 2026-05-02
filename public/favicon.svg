@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <!-- Background -->
-  <rect width="100" height="100" fill="#000" rx="20"/>
+  <rect width="100" height="100" fill="#10a37f" rx="20"/>
   
   <!-- ChatGPT hexagonal logo shape -->
   <g transform="translate(50, 50)">
