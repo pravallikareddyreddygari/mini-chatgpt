@@ -13,7 +13,28 @@ export async function POST(req: Request) {
       );
     }
 
-    const provider = process.env.API_PROVIDER || "gemini";
+    // Auto-detect which API key is available
+    const openrouterKey = process.env.OPENROUTER_API_KEY || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+
+    // Use API_PROVIDER if set, otherwise auto-detect based on available keys
+    let provider = process.env.API_PROVIDER;
+    
+    if (!provider) {
+      if (openrouterKey) {
+        provider = "openrouter";
+      } else if (geminiKey) {
+        provider = "gemini";
+      } else if (openaiKey) {
+        provider = "openai";
+      } else {
+        return NextResponse.json(
+          { error: "No API key configured. Please add OPENROUTER_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY" },
+          { status: 500 }
+        );
+      }
+    }
 
     if (provider === "openrouter") {
       return await handleOpenRouter(message, req);
