@@ -13,10 +13,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const provider = process.env.API_PROVIDER || "openai";
+    const provider = process.env.API_PROVIDER || "openrouter";
 
     if (provider === "openrouter") {
-      return await handleOpenRouter(message);
+      return await handleOpenRouter(message, req);
     } else {
       return await handleOpenAI(message);
     }
@@ -30,18 +30,22 @@ export async function POST(req: Request) {
   }
 }
 
-async function handleOpenRouter(message: string) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+async function handleOpenRouter(message: string, req: Request) {
+  const apiKey = process.env.OPENROUTER_API_KEY || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
   
   console.log("API Key exists:", !!apiKey);
   console.log("API Key length:", apiKey?.length || 0);
+  console.log("Environment:", process.env.NODE_ENV);
   
   if (!apiKey) {
     return NextResponse.json(
-      { error: "OpenRouter API key not configured. Please check your .env.local file and restart the server." },
+      { error: "OpenRouter API key not configured. Please add OPENROUTER_API_KEY in Vercel environment variables." },
       { status: 500 }
     );
   }
+
+  // Get the site URL dynamically
+  const siteUrl = req.headers.get('origin') || req.headers.get('referer') || 'https://your-app.vercel.app';
 
   const response = await fetch(
     "https://openrouter.ai/api/v1/chat/completions",
@@ -50,7 +54,7 @@ async function handleOpenRouter(message: string) {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:3000",
+        "HTTP-Referer": siteUrl,
         "X-Title": "Mini ChatGPT"
       },
       body: JSON.stringify({
@@ -84,7 +88,9 @@ async function handleOpenRouter(message: string) {
 }
 
 async function handleOpenAI(message: string) {
-  if (!process.env.OPENAI_API_KEY) {
+  const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+  
+  if (!apiKey) {
     return NextResponse.json(
       { error: "OpenAI API key not configured. Please add OPENAI_API_KEY to your .env.local file" },
       { status: 500 }
@@ -96,7 +102,7 @@ async function handleOpenAI(message: string) {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
