@@ -31,9 +31,14 @@ export async function POST(req: Request) {
 }
 
 async function handleOpenRouter(message: string) {
-  if (!process.env.OPENROUTER_API_KEY) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  
+  console.log("API Key exists:", !!apiKey);
+  console.log("API Key length:", apiKey?.length || 0);
+  
+  if (!apiKey) {
     return NextResponse.json(
-      { error: "OpenRouter API key not configured" },
+      { error: "OpenRouter API key not configured. Please check your .env.local file and restart the server." },
       { status: 500 }
     );
   }
@@ -43,7 +48,7 @@ async function handleOpenRouter(message: string) {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "http://localhost:3000",
         "X-Title": "Mini ChatGPT"
